@@ -153,7 +153,6 @@ class Trail {
         return points;
     }
 
-
     draw(ctx) {
         ctx.save();
         ctx.setLineDash([10, 15]);
@@ -274,9 +273,9 @@ function drawBg() {
     ctx.rect(0, 0, W, H);
 
     var gradient = ctx.createLinearGradient(W / 2, 0, W / 2, H);
-    gradient.addColorStop(0, "black");
-    gradient.addColorStop(Math.min(Math.max(shift, 0), 1), "red");
-    gradient.addColorStop(1, "yellow");
+    gradient.addColorStop(0, "rgb(10, 0, 5)");
+    gradient.addColorStop(Math.min(Math.max(shift, 0), 1), "rgb(230, 0, 40)");
+    gradient.addColorStop(1, "rgb(235, 230, 50)");
 
     ctx.fillStyle = gradient;
     ctx.fill();
@@ -294,7 +293,7 @@ function drawSun() {
     ctx.shadowOffsetY = 0;
 
     let params = {
-        fill: 'white',
+        fill: 'rgb(230, 230, 230)',
         fillStyle: 'solid',
         stroke: 'transparent',
         curveFitting: .999,
@@ -310,7 +309,7 @@ function drawSun() {
     ctx.shadowOffsetY = 0;
 
     rc.ellipse(W / 2, H / 3, 250 * 2, 250 * 2, params);
-    ctx.fillStyle = 'rgba(255, 0, 0, .95)';
+    ctx.fillStyle = 'rgba(230, 0, 40, .95)';
     ctx.fill();
 
     rc.ellipse(W / 2, H / 3, 250 * 1, 250 * 1, params);
@@ -342,6 +341,7 @@ function drawText() {
     ctx.font = ' 15px Arial';
     ctx.fillStyle = 'yellow';
     ctx.textAlign = 'center';
+    ctx.letterSpacing = "2px";
     ctx.fillText('Edward Snowden', W / 2, H / 6.5);
     ctx.restore();
 }

@@ -22,15 +22,14 @@ function drawBg() {
 
     var gradient = ctx.createLinearGradient(W / 2, 0, W / 2, H);
     gradient.addColorStop(0, "black");
-    gradient.addColorStop(Math.min(Math.max(redColorStop, 0), 1), "red"); // Ensure it's within bounds
+    gradient.addColorStop(Math.min(Math.max(redColorStop, 0), 1), "red");
     gradient.addColorStop(1, "yellow");
 
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    time += 1; // Increment time for the next frame
+    time += 1;
 }
-
 
 function drawSun() {
     ctx.save();
@@ -76,17 +75,25 @@ function drawSun() {
 }
 
 function drawText() {
-    ctx.save();
     ctx.font = headline.size + ' Arial';
     ctx.fillStyle = 'yellow';
     ctx.textAlign = 'center';
-    ctx.fillText(headline.text + mark, W / 2, H / 9);
-    ctx.restore();
+    ctx.fillText(headline.text + mark, W / 2, H / 11);
 
-    ctx.save()
     ctx.font = ' 30px Arial';
     ctx.fillStyle = 'yellow';
     ctx.textAlign = 'center';
-    ctx.fillText('"A DIGITAL ARTIFACT." Trying to save the world.', W / 2 + 50, H / 7.5);
+    ctx.fillText('Sometimes the scandal is not what law was broken,', W / 2, H / 8.5);
+
+    ctx.font = ' 30px Arial';
+    ctx.fillStyle = 'yellow';
+    ctx.textAlign = 'center';
+    ctx.fillText('but what the law allows.', W / 2, H / 7.5);
+
+
+    ctx.font = ' 15px Arial';
+    ctx.fillStyle = 'yellow';
+    ctx.textAlign = 'center';
+    ctx.fillText('Edward Snowden', W / 2, H / 6.5);
     ctx.restore();
 }

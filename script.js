@@ -17,18 +17,15 @@ function animateDraw() {
 
     ctx.save();
 
-    // Calculate small distortion values using Perlin noise
-    const noiseX = (perlin.noise(time * .9)) * 0.0002; // Small horizontal distortion
-    const noiseY = (perlin.noise(0, time * .9)) * 0.0002; // Small vertical distortion
-
-    // Apply a small transformation to simulate deformation
+    const noiseX = (perlin.noise(time * .9)) * 0.0002;
+    const noiseY = (perlin.noise(0, time * .9)) * 0.0002;
     ctx.setTransform(
-        1 + noiseX, // Scale X
-        noiseY,     // Skew Y
-        noiseX,     // Skew X
-        1 + noiseY, // Scale Y
-        0,          // Translate X
-        0           // Translate Y
+        1 + noiseX,
+        noiseY,
+        noiseX,
+        1 + noiseY,
+        0,
+        0
     );
 
     drawText();

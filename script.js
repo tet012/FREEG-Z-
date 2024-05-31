@@ -134,7 +134,7 @@ class Trail {
         this.startX = R.random_num(-W, W * 2);
         this.startY = 0;
 
-        const distanceFromFlower = R.random_num(100, 1000);
+        const distanceFromFlower = R.random_num(150, 1000);
         const angle = Math.atan2(flowerY - this.startY, flowerX - this.startX);
 
         this.endX = flowerX - distanceFromFlower * Math.cos(angle);
@@ -255,7 +255,7 @@ class Bomb {
     }
 }
 
-const numTrails = R.random_int(1, 50);
+const numTrails = R.random_int(5, 50);
 const trails = Array.from({ length: numTrails }, () => new Trail(W / 2, H * 0.9));
 
 let headlines = [
@@ -288,8 +288,40 @@ function drawBg() {
     time += 1;
 }
 
-function drawSun() {
+let eyeH = 250 * 2;
+let eyeTarget = eyeH;
+let animProgress = 0;
+let animDur = 100;
+let lastBlink = 0;
+let minInt = 500;
+let maxInt = 10000;
+let nextBlinkTime = Date.now() + getRandomBlinkInterval();
+
+function getRandomBlinkInterval() {
+    return minInt + Math.random() * (maxInt - minInt);
+}
+
+function drawEye() {
     ctx.save();
+
+    if (eyeH !== eyeTarget) {
+        animProgress += 1 / (animDur / 33);
+        const easedProgress = easeInOutQuad(animProgress);
+        eyeH = eyeTarget * easedProgress + eyeH * (1 - easedProgress);
+        if (animProgress >= 1) {
+            eyeH = eyeTarget;
+            animProgress = 0;
+            if (eyeH === 0) {
+                eyeTarget = 250 * 2;
+                nextBlinkTime = Date.now() + getRandomBlinkInterval();
+            }
+        }
+    }
+
+    const currentTime = Date.now();
+    if (currentTime >= nextBlinkTime && eyeH === 250 * 2) {
+        eyeTarget = 0;
+    }
 
     ctx.save()
     ctx.shadowColor = 'rgba(255, 255, 0, .5)';
@@ -304,7 +336,8 @@ function drawSun() {
         curveFitting: .999,
     };
 
-    rc.ellipse(W / 2, H / 3, 250 * 4, 250 * 2, params)
+    //EYE
+    rc.ellipse(W / 2, H / 3, 250 * 4, eyeH, params)
     ctx.clip()
 
     ctx.shadowColor = 'rgba(255, 0, 0, .5)';
@@ -312,10 +345,12 @@ function drawSun() {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
+    // IRIS
     rc.ellipse(W / 2, H / 3, 250 * 2, 250 * 2, params);
     ctx.fillStyle = 'rgba(230, 0, 40, .95)';
     ctx.fill();
 
+    // Pupil
     rc.ellipse(W / 2, H / 3, 250 * 1, 250 * 1, params);
     ctx.shadowColor = 'black';
     ctx.shadowBlur = 200;
@@ -350,6 +385,10 @@ function drawText() {
     ctx.restore();
 }
 
+function easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
 class Flower {
     constructor(x, y) {
         this.x = x;
@@ -360,16 +399,22 @@ class Flower {
 
     draw(ctx) {
         let debut = { x: W / 2, y: H };
-        let cp1 = { x: W / 2.1, y: H * 0.98 };
-        let cp2 = { x: W / 1.75, y: H * .95 };
+        let cp1 = { x: W / 2.05, y: H * 0.98 };
+        let cp2 = { x: W / 1.95, y: H * .95 };
         let fin = { x: W / 2, y: H * 0.9 };
 
-        ctx.beginPath();
-        ctx.moveTo(debut.x, debut.y);
-        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, fin.x, fin.y);
-        ctx.stroke();
-        ctx.lineWidth = 5;
 
+        let points = [
+            [debut.x, debut.y],
+            [cp1.x, cp1.y],
+            [cp2.x, cp2.y],
+            [fin.x, fin.y]
+        ]
+
+        ctx.beginPath();
+        rc.curve(points, {
+            stroke: 'black', strokeWidth: 3
+        });
 
         for (let i = 0; i < 8; i++) {
             ctx.save();
@@ -378,8 +423,6 @@ class Flower {
             rc.ellipse(0, 0, 50, 150, { fill: 'yellow', fillStyle: 'solid', stroke: 'transparent' });
             ctx.restore();
         }
-
-
         rc.ellipse(W / 2, H * 0.9, 50, 50, { fill: 'red', fillStyle: 'solid', stroke: 'transparent' });
     }
 }
@@ -388,21 +431,16 @@ let flowers = new Flower(W / 2, H);
 function draw() {
     requestAnimationFrame(draw);
     drawBg();
-    drawSun();
 
-    const noiseX = (perlin.noise(time * .9)) * 0.0002;
-    const noiseY = (perlin.noise(0, time * .9)) * 0.0002;
-    ctx.setTransform(
-        1 + noiseX,
-        noiseY,
-        noiseX,
-        1 + noiseY,
-        0,
-        0
-    );
+    const noiseValue = perlin.noise(time * 0.001);
+    const currentTime = Date.now();
+    if (noiseValue > 0.5 && currentTime - lastBlink > minInt && eyeH === 250 * 2) {
+        eyeTarget = 0;
+        lastBlink = currentTime;
+    }
 
     drawText();
-
+    drawEye();
     trails.forEach(trail => {
         trail.update();
         trail.draw(ctx);
@@ -411,7 +449,7 @@ function draw() {
     flowers.draw(ctx);
 
     granulate(52);
-
 }
+
 
 draw();

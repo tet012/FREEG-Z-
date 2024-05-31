@@ -288,40 +288,8 @@ function drawBg() {
     time += 1;
 }
 
-let eyeH = 250 * 2;
-let eyeTarget = eyeH;
-let animProgress = 0;
-let animDur = 100;
-let lastBlink = 0;
-let minInt = 500;
-let maxInt = 10000;
-let nextBlinkTime = Date.now() + getRandomBlinkInterval();
-
-function getRandomBlinkInterval() {
-    return minInt + Math.random() * (maxInt - minInt);
-}
-
 function drawEye() {
     ctx.save();
-
-    if (eyeH !== eyeTarget) {
-        animProgress += 1 / (animDur / 33);
-        const easedProgress = easeInOutQuad(animProgress);
-        eyeH = eyeTarget * easedProgress + eyeH * (1 - easedProgress);
-        if (animProgress >= 1) {
-            eyeH = eyeTarget;
-            animProgress = 0;
-            if (eyeH === 0) {
-                eyeTarget = 250 * 2;
-                nextBlinkTime = Date.now() + getRandomBlinkInterval();
-            }
-        }
-    }
-
-    const currentTime = Date.now();
-    if (currentTime >= nextBlinkTime && eyeH === 250 * 2) {
-        eyeTarget = 0;
-    }
 
     ctx.save()
     ctx.shadowColor = 'rgba(255, 255, 0, .5)';
@@ -337,7 +305,7 @@ function drawEye() {
     };
 
     //EYE
-    rc.ellipse(W / 2, H / 3, 250 * 4, eyeH, params)
+    rc.ellipse(W / 2, H / 3, 250 * 4, 250 * 2, params)
     ctx.clip()
 
     ctx.shadowColor = 'rgba(255, 0, 0, .5)';
@@ -431,13 +399,6 @@ let flowers = new Flower(W / 2, H);
 function draw() {
     requestAnimationFrame(draw);
     drawBg();
-
-    const noiseValue = perlin.noise(time * 0.001);
-    const currentTime = Date.now();
-    if (noiseValue > 0.5 && currentTime - lastBlink > minInt && eyeH === 250 * 2) {
-        eyeTarget = 0;
-        lastBlink = currentTime;
-    }
 
     drawText();
     drawEye();

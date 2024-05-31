@@ -128,14 +128,20 @@ let perlin = new Perlin();
 let R = new Random();
 
 class Trail {
-    constructor() {
-        this.startX = R.random_num(0, W);
+    constructor(flowerX, flowerY) {
+        this.flowerX = flowerX;
+        this.flowerY = flowerY;
+        this.startX = R.random_num(-W, W * 2);
         this.startY = 0;
-        this.endX = R.random_num(W * 0.2, W * 0.8);
-        this.endY = R.random_num(H * 0.6, H * 0.8)
+
+        const distanceFromFlower = R.random_num(100, 1000);
+        const angle = Math.atan2(flowerY - this.startY, flowerX - this.startX);
+
+        this.endX = flowerX - distanceFromFlower * Math.cos(angle);
+        this.endY = flowerY - distanceFromFlower * Math.sin(angle);
         this.points = this.addPoints(this.startX, this.startY, this.endX, this.endY);
         this.dashOffset = 0;
-        this.size = R.random_int(5, 25)
+        this.size = R.random_int(5, 25);
     }
 
     addPoints(startX, startY, endX, endY) {
@@ -216,7 +222,6 @@ class Bomb {
 
         ctx.save();
 
-
         rc.ellipse(0, 0, this.radius, this.radius * 4, params);
         ctx.restore();
 
@@ -225,7 +230,7 @@ class Bomb {
         let bp = {
             p1: [0, 0],
             p2: [this.radius, this.radius],
-            p3: [this.radius * 1.15, this.radius * 2],
+            p3: [this.radius * 1.5, this.radius * 3],
             p4: [0, this.radius * 1.5]
         }
 
@@ -243,15 +248,15 @@ class Bomb {
             [bp.p4[0], -bp.p4[1]]
         ], params);
 
-        rc.rectangle(-this.radius / 4, -this.radius * 1.75, this.radius / 2, this.radius, params);
+        rc.rectangle(-this.radius / 4, -this.radius * 2, this.radius / 2, this.radius, params);
 
         ctx.closePath();
         ctx.restore();
     }
 }
 
-const numTrails = R.random_int(1, 25);
-const trails = Array.from({ length: numTrails }, () => new Trail());
+const numTrails = R.random_int(1, 50);
+const trails = Array.from({ length: numTrails }, () => new Trail(W / 2, H * 0.9));
 
 let headlines = [
     { text: '“PEACE”', size: 'bold 100px' },
@@ -302,7 +307,6 @@ function drawSun() {
     rc.ellipse(W / 2, H / 3, 250 * 4, 250 * 2, params)
     ctx.clip()
 
-
     ctx.shadowColor = 'rgba(255, 0, 0, .5)';
     ctx.shadowBlur = 200;
     ctx.shadowOffsetX = 0;
@@ -346,6 +350,40 @@ function drawText() {
     ctx.restore();
 }
 
+class Flower {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 100;
+        this.height = 200;
+    }
+
+    draw(ctx) {
+        let debut = { x: W / 2, y: H };
+        let cp1 = { x: W / 2.1, y: H * 0.98 };
+        let cp2 = { x: W / 1.75, y: H * .95 };
+        let fin = { x: W / 2, y: H * 0.9 };
+
+        ctx.beginPath();
+        ctx.moveTo(debut.x, debut.y);
+        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, fin.x, fin.y);
+        ctx.stroke();
+        ctx.lineWidth = 5;
+
+
+        for (let i = 0; i < 8; i++) {
+            ctx.save();
+            ctx.translate(W / 2, H * 0.9);
+            ctx.rotate(i * Math.PI / 4);
+            rc.ellipse(0, 0, 50, 150, { fill: 'yellow', fillStyle: 'solid', stroke: 'transparent' });
+            ctx.restore();
+        }
+
+
+        rc.ellipse(W / 2, H * 0.9, 50, 50, { fill: 'red', fillStyle: 'solid', stroke: 'transparent' });
+    }
+}
+let flowers = new Flower(W / 2, H);
 
 function draw() {
     requestAnimationFrame(draw);
@@ -369,6 +407,8 @@ function draw() {
         trail.update();
         trail.draw(ctx);
     });
+
+    flowers.draw(ctx);
 
     granulate(52);
 
